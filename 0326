@@ -38,3 +38,18 @@ BOOL CImageProcessingDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
    return TRUE;
 }
+
+void CImageProcessingView::OnDraw(CDC* pDC)
+{
+   CImageProcessingDoc* pDoc = GetDocument(); // 도큐먼트 클래스 참조
+   ASSERT_VALID(pDoc);
+   int i, j;
+   unsigned char R, G, B;
+
+   for(i=0 ; i<pDoc->m_height ; i++){
+      for(j=0 ; j<pDoc->m_width ; j++){
+         R = G = B = pDoc->m_InputImage[i*pDoc->m_width+j];
+         pDC->SetPixel(j+5, i+5, RGB(R, G, B));
+      }
+   }
+}
