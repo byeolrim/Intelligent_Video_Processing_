@@ -1,0 +1,150 @@
+// MFC_assignment04View.cpp: CMFCassignment04View 클래스의 구현
+//
+
+#include "pch.h"
+#include "framework.h"
+#ifndef SHARED_HANDLERS
+#include "MFC_assignment04.h"
+#endif
+
+#include "MFC_assignment04Doc.h"
+#include "MFC_assignment04View.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+
+// CMFCassignment04View
+
+IMPLEMENT_DYNCREATE(CMFCassignment04View, CView)
+
+BEGIN_MESSAGE_MAP(CMFCassignment04View, CView)
+	// 표준 인쇄 명령입니다.
+	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
+	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
+	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CMFCassignment04View::OnFilePrintPreview)
+	ON_WM_CONTEXTMENU()
+	ON_WM_RBUTTONUP()
+	ON_COMMAND(ID_UP_SAMPLING, &CMFCassignment04View::OnUpSampling)
+END_MESSAGE_MAP()
+
+// CMFCassignment04View 생성/소멸
+
+CMFCassignment04View::CMFCassignment04View() noexcept
+{
+	// 생성자 코드 (필요 시 추가 작업)
+}
+
+CMFCassignment04View::~CMFCassignment04View()
+{
+	// 소멸자 코드 (필요 시 정리 작업)
+}
+
+BOOL CMFCassignment04View::PreCreateWindow(CREATESTRUCT& cs)
+{
+	// 윈도우 스타일 수정이 필요할 경우 여기서 처리
+	return CView::PreCreateWindow(cs);
+}
+
+// CMFCassignment04View 그리기
+
+void CMFCassignment04View::OnDraw(CDC* pDC)
+{
+	CMFCassignment04Doc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+		return;
+
+	// 원본 이미지 그리기
+	DrawImage(pDC, pDoc, pDoc->m_InputImage, pDoc->m_height, pDoc->m_width, 5, 5);
+
+	// 확대된 이미지 그리기
+	DrawImage(pDC, pDoc, pDoc->m_OutputImage, pDoc->m_Re_height, pDoc->m_Re_width, pDoc->m_width + 10, 5);
+}
+
+// 이미지 그리기 함수 (중복 코드 최소화)
+void CMFCassignment04View::DrawImage(CDC* pDC, CMFCassignment04Doc* pDoc, unsigned char* imageData, int height, int width, int offsetX, int offsetY)
+{
+	unsigned char R, G, B;
+
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; j++) {
+			R = G = B = imageData[i * width + j];
+			pDC->SetPixel(j + offsetX, i + offsetY, RGB(R, G, B));
+		}
+	}
+}
+
+// CMFCassignment04View 인쇄
+
+void CMFCassignment04View::OnFilePrintPreview()
+{
+#ifndef SHARED_HANDLERS
+	AFXPrintPreview(this);
+#endif
+}
+
+BOOL CMFCassignment04View::OnPreparePrinting(CPrintInfo* pInfo)
+{
+	// 기본적인 인쇄 준비
+	return DoPreparePrinting(pInfo);
+}
+
+void CMFCassignment04View::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
+{
+	// 인쇄 시작 전 추가 작업
+}
+
+void CMFCassignment04View::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
+{
+	// 인쇄 종료 후 정리 작업
+}
+
+void CMFCassignment04View::OnRButtonUp(UINT /*nFlags*/, CPoint point)
+{
+	ClientToScreen(&point);
+	OnContextMenu(this, point);
+}
+
+void CMFCassignment04View::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
+{
+#ifndef SHARED_HANDLERS
+	theApp.GetContextMenuManager()->ShowPopupMenu(IDR_POPUP_EDIT, point.x, point.y, this, TRUE);
+#endif
+}
+
+// CMFCassignment04View 진단
+
+#ifdef _DEBUG
+void CMFCassignment04View::AssertValid() const
+{
+	CView::AssertValid();
+}
+
+void CMFCassignment04View::Dump(CDumpContext& dc) const
+{
+	CView::Dump(dc);
+}
+
+CMFCassignment04Doc* CMFCassignment04View::GetDocument() const // 디버그되지 않은 버전은 인라인으로 지정됩니다.
+{
+	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CMFCassignment04Doc)));
+	return (CMFCassignment04Doc*)m_pDocument;
+}
+#endif //_DEBUG
+
+// CMFCassignment04View 메시지 처리기
+
+void CMFCassignment04View::OnUpSampling()
+{
+	// 업샘플링 처리
+	CMFCassignment04Doc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	// Doc의 OnUpSampling 함수 호출
+	pDoc->OnUpSampling();
+
+	// 화면 갱신
+	Invalidate(TRUE);
+}
